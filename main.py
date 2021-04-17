@@ -13,5 +13,5 @@ def root():
 
 
 @app.get("/method/{type}", response_model=MethodResp)
-def method_type(type: str):
-    return MethodResp(msg=f'{type}'.upper())
+def method(type: str):
+    return MethodResp(msg={"method": f'{type}'.upper()})
