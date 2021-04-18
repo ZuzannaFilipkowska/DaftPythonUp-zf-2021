@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, Response
 from pydantic import BaseModel
 import hashlib
 
@@ -43,6 +43,6 @@ def get_method_delete():
 
 
 @app.get("/auth",  status_code=204)
-def password_auth(response: Response, password=None, password_hash=None):
-    if password_hash or str(password_hash) != hashlib.sha512(str(password).encode("utf-8")) or not password:
+def password_auth(password=None, password_hash=None):
+    if not password_hash or password == "" or password_hash == "" or str(password_hash) != hashlib.sha512(str(password).encode("utf-8")).hexdigest()  or not password:
         return Response(status_code=401)
