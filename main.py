@@ -14,26 +14,26 @@ def root():
     return {"message": "Hello world!"}
 
 
-@app.get("/method/post", status_code=201)
+@app.post("/method", status_code=201)
 def get_method_post():
     return {"method": "POST"}
 
 
-@app.get("/method/get")
+@app.get("/method")
 def get_method_get():
     return {"method": "GET"}
 
 
-@app.get("/method/put")
+@app.put("/method/put")
 def get_method_put():
     return {"method": "PUT"}
 
 
-@app.get("/method/options")
+@app.options("/method")
 def get_method_options():
     return {"method": "OPTIONS"}
 
 
-@app.get("/method/delete")
+@app.delete("/method")
 def get_method_delete():
     return {"method": "DELETE"}
