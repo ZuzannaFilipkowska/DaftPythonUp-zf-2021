@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+
+
 app = FastAPI()
 
 
@@ -12,6 +14,6 @@ def root():
     return {"message": "Hello world!"}
 
 
-@app.get("/method/{type}", response_model=MethodResp)
-def method(type: str):
-    return MethodResp(msg={"method": f'{type}'.upper()})
+@app.get("/method/{type}")
+def get_method(type: str):
+    return {"method": f'{type}'.upper()}
