@@ -24,7 +24,7 @@ def get_method_get():
     return {"method": "GET"}
 
 
-@app.put("/method/put")
+@app.put("/method")
 def get_method_put():
     return {"method": "PUT"}
 
