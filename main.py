@@ -85,7 +85,7 @@ def register(patient: Patient):
     app.id += 1
     app.date_time = datetime.date.today()
     delta = timedelta(days=count_letters(patient.name + patient.surname))
-    vacc_date = app.dateTime + delta
+    vacc_date = app.date_time + delta
     reg_patient = {
             "id": app.id,
             "name": patient.name,
