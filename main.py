@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 import hashlib
 import datetime
@@ -7,12 +7,8 @@ from datetime import timedelta
 
 app = FastAPI()
 
-
-class MethodResp(BaseModel):
-    msg: str
-
-
 # 1.1
+
 
 @app.get("/")
 def root():
@@ -57,7 +53,7 @@ def password_auth(password=None, password_hash=None):
 # 1.4
 
 app.id = 0
-
+patients = []
 
 class Patient(BaseModel):
     name: str
@@ -92,4 +88,18 @@ def register(patient: Patient):
             "surname": patient.surname,
             "register_date": str(app.date_time),
             "vaccination_date": str(vacc_date)}
+    patients.append(reg_patient)
     return reg_patient
+
+
+# 1.5
+
+
+@app.get('/patient/{id}', status_code=200)
+def get_patient(id: int, response: Response):
+    if id < 1:
+        response.status_code = 400
+    elif id > app.id:
+        response.status_code = 404
+    else:
+        return patients[id - 1]
