@@ -62,7 +62,7 @@ def test_password_auth_empty():
     assert response.status_code == 401
 
 
-def test_register():
+def test_register_1():
     patient = {
         "name": "Jan",
         "surname": "Kowalski"
@@ -79,7 +79,24 @@ def test_register():
     assert response.json() == reg_patient
 
 
-def test_get_patient():
+def test_register_2():
+    patient = {
+        "name": "Karol",
+        "surname": "Kowalski"
+    }
+    response = client.post("/register", json=patient)
+    reg_patient = {
+        "id": 2,
+        "name": "Karol",
+        "surname": "Kowalski",
+        "register_date": "2021-04-20",
+        "vaccination_date": "2021-05-03"
+    }
+    assert response.status_code == 201
+    assert response.json() == reg_patient
+
+
+def test_get_patient_1():
     response = client.get("/patient/1")
     assert response.status_code == 200
     reg_patient = {
@@ -91,3 +108,13 @@ def test_get_patient():
     }
     assert response.json() == reg_patient
 
+
+
+def test_get_patient_incorrect():
+    response = client.get("/patient/-1")
+    assert response.status_code == 400
+
+
+def test_get_patient_not_exists():
+    response = client.get("/patient/5")
+    assert response.status_code == 404
