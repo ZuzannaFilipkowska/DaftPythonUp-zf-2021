@@ -99,7 +99,7 @@ def register(patient: Patient):
 def get_patient(id: int, response: Response):
     if id < 1:
         response.status_code = 400
-    elif id > app.id:
+    elif id > len(patients):
         response.status_code = 404
     else:
         return patients[id - 1]
