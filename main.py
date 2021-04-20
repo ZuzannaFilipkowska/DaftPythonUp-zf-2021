@@ -84,7 +84,7 @@ def count_letters(word):
 def register(patient: Patient):
     app.id += 1
     app.date_time = datetime.date.today()
-    delta = timedelta(days=len(count_letters(patient.name + patient.surname)))
+    delta = timedelta(days=count_letters(patient.name + patient.surname))
     vacc_date = app.dateTime + delta
     reg_patient = {
             "id": app.id,
