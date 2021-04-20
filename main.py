@@ -72,11 +72,19 @@ class RegisteredPatient(BaseModel):
     vaccination_date: str
 
 
+def count_letters(word):
+    number = 0
+    for letter in word:
+        if letter.isalpha():
+            number += 1
+    return number
+
+
 @app.post('/register', response_model=RegisteredPatient, status_code=201)
 def register(patient: Patient):
     app.id += 1
     app.dateTime = datetime.date.today()
-    delta = timedelta(days=len(patient.name + patient.surname))
+    delta = timedelta(days=len(count_letters(patient.name) + count_letters(patient.surname)))
     vacc_date = app.dateTime + delta
     reg_patient = {
             "id": app.id,
