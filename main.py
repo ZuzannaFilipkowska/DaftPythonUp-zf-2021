@@ -83,13 +83,13 @@ def count_letters(word):
 @app.post('/register', response_model=RegisteredPatient, status_code=201)
 def register(patient: Patient):
     app.id += 1
-    app.dateTime = datetime.date.today()
-    delta = timedelta(days=len(count_letters(patient.name) + count_letters(patient.surname)))
+    app.date_time = datetime.date.today()
+    delta = timedelta(days=len(count_letters(patient.name + patient.surname)))
     vacc_date = app.dateTime + delta
     reg_patient = {
             "id": app.id,
             "name": patient.name,
             "surname": patient.surname,
-            "register_date": str(app.dateTime),
+            "register_date": str(app.date_time),
             "vaccination_date": str(vacc_date)}
     return reg_patient
