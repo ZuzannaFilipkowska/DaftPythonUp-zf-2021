@@ -66,14 +66,14 @@ def welcome_response(format):
 
 @app.get("/welcome_session")
 def welcome(*, response: Response, session_token: str = Cookie(None), format: str = None):
-    if session_token not in app.s_token:
+    if session_token != app.s_token:
         raise HTTPException(status_code=401)
     return welcome_response(format)
 
 
 @app.get("/welcome_token")
 def welcome_token(*, response: Response, token: str = Cookie(None), format: str = None):
-    if token not in app.t_token:
+    if token != app.t_token:
         raise HTTPException(status_code=401)
     return welcome_response(format)
 
