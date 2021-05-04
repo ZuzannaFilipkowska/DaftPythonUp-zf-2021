@@ -13,7 +13,7 @@ mako = FastAPIMako(app)
 security = HTTPBasic()
 
 app.s_token = "token_session"
-app.t_token = "token_login"
+app.t_token = "token"
 
 # 3.1
 
