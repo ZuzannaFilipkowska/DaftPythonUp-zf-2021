@@ -112,7 +112,7 @@ def logout_session(session_token: str = Cookie(None), format: str = None):
     if session_token not in app.s_token:
         raise HTTPException(status_code=401)
     for element in app.s_token:
-        if token == element:
+        if session_token == element:
             app.t_token.remove(element)
             break
     if format == 'html':
