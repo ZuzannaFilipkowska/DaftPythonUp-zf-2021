@@ -111,12 +111,10 @@ def goodbye(format):
 def logout_session(session_token: str = Cookie(None), format: str = None):
     if session_token not in app.s_token:
         raise HTTPException(status_code=401)
-    i = 0
     for element in app.s_token:
-        if session_token == element:
-            del app.s_token[i]
+        if token == element:
+            app.t_token.remove(element)
             break
-        i=i+1
     if format == 'html':
         return RedirectResponse(url="/logged_out?format=html", status_code=302)
     if format == 'json':
@@ -128,12 +126,10 @@ def logout_session(session_token: str = Cookie(None), format: str = None):
 def logout(token: str = None, format: str = None):
     if token not in app.t_token:
         raise HTTPException(status_code=401)
-    i = 0
     for element in app.t_token:
         if token == element:
-            del app.t_token[i]
+            app.t_token.remove(element)
             break
-        i=i+1
     if format == 'html':
         return RedirectResponse(url="/logged_out?format=html", status_code=302)
     if format == 'json':
