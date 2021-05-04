@@ -37,7 +37,10 @@ def login(response: Response, credentials: HTTPBasicCredentials = Depends(securi
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
-    app.s_token.append(token)
+    if token not in app.s_token:
+        if len(app.s_token) == 3:
+            del app.s_token[0]
+        app.s_token.append(token)
     response.set_cookie(key="session_token", value=token)
 
 
@@ -47,7 +50,10 @@ def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(se
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
-    app.t_token.append(token)
+    if token not in app.t_token:
+        if len(app.t_token) == 3:
+            del app.t_token[0]
+        app.t_token.append(token)
     return {"token": token}
 
 
