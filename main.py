@@ -12,11 +12,8 @@ app.__name__ = "templates"
 mako = FastAPIMako(app)
 security = HTTPBasic()
 
-#app.s_token = "token_session"
-#app.t_token = "token_login"
-
-app.s_token = []
-app.t_token = []
+app.s_token = "token_session"
+app.t_token = "token_login"
 
 # 3.1
 
@@ -35,26 +32,16 @@ def index_static(request: Request):
 def login(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
         raise HTTPException(status_code=401)
-    random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
-    token = random_string
-    if token not in app.s_token:
-        if len(app.s_token) == 3:
-            app.t_token.remove(token)
-        app.s_token.append(token)
-    response.set_cookie(key="session_token", value=token)
+    app.s_token = "token_session"
+    response.set_cookie(key="session_token", value="token_session")
 
 
 @app.post("/login_token", status_code=201)
 def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
         raise HTTPException(status_code=401)
-    random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
-    token = random_string
-    if token not in app.t_token:
-        if len(app.t_token) == 3:
-            app.t_token.remove(token)
-        app.t_token.append(token)
-    return {"token": token}
+    app.t_value = "token"
+    return {"token": app.t_value}
 
 
 # 3.3
