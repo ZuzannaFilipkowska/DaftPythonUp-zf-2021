@@ -39,7 +39,7 @@ def login(response: Response, credentials: HTTPBasicCredentials = Depends(securi
     token = random_string
     if token not in app.s_token:
         if len(app.s_token) == 3:
-            del app.s_token[0]
+            app.t_token.remove(token)
         app.s_token.append(token)
     response.set_cookie(key="session_token", value=token)
 
@@ -52,7 +52,7 @@ def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(se
     token = random_string
     if token not in app.t_token:
         if len(app.t_token) == 3:
-            del app.t_token[0]
+            app.t_token.remove(token)
         app.t_token.append(token)
     return {"token": token}
 
