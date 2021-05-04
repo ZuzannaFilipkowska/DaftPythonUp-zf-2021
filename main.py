@@ -1,17 +1,18 @@
 from fastapi import FastAPI, Response, status, Request, HTTPException
 from pydantic import BaseModel
-import hashlib
 import random
 import string
-from datetime import datetime, timedelta
-from typing import Dict, Optional, List
-from fastapi import Query
+from datetime import datetime
+from typing import Optional
 from fastapi.responses import HTMLResponse
 from fastapi_mako import FastAPIMako
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi import Depends
 
 app = FastAPI()
 app.__name__ = "templates"
 mako = FastAPIMako(app)
+security = HTTPBasic()
 
 
 # 3.1
@@ -28,8 +29,8 @@ def index_static(request: Request):
 # 3.2
 
 @app.post("/login_session", status_code=201)
-def login(user: str, password: str, response: Response):
-    if user != "4dm1n" or password != "NotSoSecurePa$$":
+def login(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
@@ -37,8 +38,8 @@ def login(user: str, password: str, response: Response):
 
 
 @app.post("/login_token", status_code=201)
-def get_token(user: str, password: str, response: Response):
-    if user != "4dm1n" or password != "NotSoSecurePa$$":
+def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
