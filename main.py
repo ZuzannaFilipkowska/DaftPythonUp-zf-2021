@@ -64,14 +64,14 @@ def welcome_response(format):
         return PlainTextResponse(content='Welcome!')
 
 
-@app.get("/welcome_session")
+@app.get("/welcome_session", status_code=200)
 def welcome(*, response: Response, session_token: str = Cookie(None), format: str = None):
     if session_token != app.s_token:
         raise HTTPException(status_code=401)
     return welcome_response(format)
 
 
-@app.get("/welcome_token")
+@app.get("/welcome_token", status_code=200)
 def welcome_token(*, response: Response, token: str = Cookie(None), format: str = None):
     if token != app.t_token:
         raise HTTPException(status_code=401)
