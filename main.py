@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, status, Request, HTTPException
 import random
 import string
 from datetime import datetime
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi_mako import FastAPIMako
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import Depends, Cookie
@@ -12,8 +12,11 @@ app.__name__ = "templates"
 mako = FastAPIMako(app)
 security = HTTPBasic()
 
-app.s_token = "token_session"
-app.t_token = "token_login"
+#app.s_token = "token_session"
+#app.t_token = "token_login"
+
+app.s_token = []
+app.t_token = []
 
 # 3.1
 
@@ -34,7 +37,7 @@ def login(response: Response, credentials: HTTPBasicCredentials = Depends(securi
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
-    app.s_token = token
+    app.s_token.append(token)
     response.set_cookie(key="session_token", value=token)
 
 
@@ -44,12 +47,12 @@ def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(se
         raise HTTPException(status_code=401)
     random_string = "".join(random.choice(string.ascii_letters) for i in range(20))
     token = random_string
-    app.t_token = token
+    app.t_token.append(token)
     return {"token": token}
 
 
 # 3.3
-def welcome_response(format: str = None):
+def welcome_response(format):
     if format == "json":
         return JSONResponse(content={"message": "Welcome!"})
     if format == "html":
@@ -70,13 +73,74 @@ def welcome_response(format: str = None):
 
 @app.get("/welcome_session")
 def welcome(*, response: Response, session_token: str = Cookie(None), format: str = None):
-    if session_token != app.s_token:
+    if session_token not in app.s_token:
         raise HTTPException(status_code=401)
     return welcome_response(format)
 
 
 @app.get("/welcome_token")
 def welcome_token(*, response: Response, token: str = Cookie(None), format: str = None):
-    if token != app.t_token:
+    if token not in app.t_token:
         raise HTTPException(status_code=401)
     return welcome_response(format)
+
+
+# 3.4
+
+
+def goodbye(format):
+    if format == "json":
+        return JSONResponse(content={"message": "Logged out!"})
+    if format == "html":
+        text = """
+    <html>
+        <head>
+            <title>More HTML</title>
+        </head>
+        <body>
+            <h1>Logged out!</h1>
+        </body>
+    </html>
+    """
+        return HTMLResponse(content=text)
+    else:
+        return PlainTextResponse(content='Logged out!')
+
+
+@app.delete("/logout_session")
+def logout_session(session_token: str = Cookie(None), format: str = None):
+    if session_token not in app.s_token:
+        raise HTTPException(status_code=401)
+    i = 0
+    for element in app.s_token:
+        if session_token == element:
+            del app.s_token[i]
+            break
+        i=i+1
+    if format == 'html':
+        return RedirectResponse(url="/logged_out?format=html", status_code=302)
+    if format == 'json':
+        return RedirectResponse(url="/logged_out?format=json", status_code=302)
+    return RedirectResponse(url="/logged_out", status_code=302)
+
+
+@app.delete("/logout_token")
+def logout(token: str = None, format: str = None):
+    if token not in app.t_token:
+        raise HTTPException(status_code=401)
+    i = 0
+    for element in app.t_token:
+        if token == element:
+            del app.t_token[i]
+            break
+        i=i+1
+    if format == 'html':
+        return RedirectResponse(url="/logged_out?format=html", status_code=302)
+    if format == 'json':
+        return RedirectResponse(url="/logged_out?format=json", status_code=302)
+    return RedirectResponse(url="/logged_out", status_code=302)
+
+
+@app.get("/logged_out")
+def logged_out(format: str = None):
+    return goodbye(format)
