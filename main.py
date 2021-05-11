@@ -48,13 +48,19 @@ async def single_product(id: int):
 
 
 @app.get("/employees")
-async def all_employees(limit: int, offset: int, order: str = "EmployeeID"):
+async def all_employees(limit: int = -1, offset: int = 0, order: str = "EmployeeID"):
     cur = app.db_connection.cursor()
-    categories = ["first_name", "last_name", "city", "EmployeeID"]
-    if order not in categories:
+
+    categories = {'last_name': 'LastName',
+                 'first_name': 'FirstName',
+                 'city': 'City',
+                 'EmployeeID': 'EmployeeID',
+                 '': "EmployeeID"}
+    if order not in categories.keys():
         raise HTTPException(status_code=400)
     cur.row_factory = sqlite3.Row
     workers = cur.execute(
-        f"SELECT EmployeeID id, LastName last_name, FirstName first_name, City city FROM Employees ORDER BY {order}"
+        f"SELECT EmployeeID id, LastName last_name, FirstName first_name, City city FROM Employees ORDER BY {categories[order]} LIMIT :lim OFFSET :off"
+        , {"lim": limit, "off": offset}
     ).fetchall()
     return dict(workers=workers)
