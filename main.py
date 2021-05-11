@@ -18,10 +18,8 @@ async def shutdown():
 @app.get("/categories")
 async def get_cat():
     cur = app.db_connection.cursor()
-    cat = cur.execute("SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryID")
-    return {
-        "categories": [{"id": category[0], "name": category[1]} for category in cat]
-    }
+    cat = cur.execute("SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
+    return dict(categories=[dict(id=category[0], name=category[1]) for category in cat])
 
 
 @app.get("/customers")
