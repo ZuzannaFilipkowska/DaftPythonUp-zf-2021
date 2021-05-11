@@ -131,4 +131,8 @@ async def modyfy_cat(id: int):
 @app.delete("/categories/{id}")
 async def delete_cat(id: int):
     cur = app.db_connection.cursor()
-    # TO DO
+    cur.execute(
+        "DELETE FROM Categories WHERE CategoryID = ?", (id,)
+    )
+    app.db_connection.commit()
+    return dict(deleted=cur.rowcount)
