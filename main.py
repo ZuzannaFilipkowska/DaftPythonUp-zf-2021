@@ -49,7 +49,6 @@ async def single_product(id: int):
 
 @app.get("/employees")
 async def all_employees(limit: int = -1, offset: int = 0, order: str = "EmployeeID"):
-    cur = app.db_connection.cursor()
     order = order.strip()
     categories = {'last_name': 'LastName',
                  'first_name': 'FirstName',
@@ -58,9 +57,24 @@ async def all_employees(limit: int = -1, offset: int = 0, order: str = "Employee
                  '': "EmployeeID"}
     if order not in categories.keys():
         raise HTTPException(status_code=400)
+
+    cur = app.db_connection.cursor()
     cur.row_factory = sqlite3.Row
+
     workers = cur.execute(
         f"SELECT EmployeeID id, LastName last_name, FirstName first_name, City city FROM Employees ORDER BY {categories[order]} LIMIT :lim OFFSET :off"
         , {"lim": limit, "off": offset}
     ).fetchall()
     return dict(employees=workers)
+
+
+@app.get("/products_extended")
+async def get_product_extended():
+    cur = app.db_connection.cursor()
+    cur.row_factory = sqlite3.Row
+    product = cur.execute('''
+        SELECT Products.ProductID, Products.ProductName, Categories.CategoryName, Suppliers.CompanyName
+        FROM Products LEFT JOIN Categories ON Products.CategoryID = Categories.CategoryID
+        LEFT JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID ORDER BY Products.ProductID
+    ''').fetchall()
+    return dict(products_extended=product)
