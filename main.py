@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
@@ -34,14 +34,14 @@ async def get_customers():
     ).fetchall()
     return dict(customers=customers)
 
-'''
 
-
-@app.get("/suppliers/{supplier_id}")
-async def single_supplier(supplier_id: int):
-    app.db_connection.row_factory = sqlite3.Row
-    data = app.db_connection.execute(
-        f"SELECT CompanyName, Address FROM Suppliers WHERE SupplierID = {supplier_id}").fetchone()
-
-    return data
-    '''
+@app.get("/products/{id}")
+async def single_product(id: int):
+    cur = app.db_connection.cursor()
+    cur.row_factory = sqlite3.Row
+    product = cur.execute(
+        "SELECT ProductID id, ProductName name FROM Products WHERE ProductID = ?",
+        (id, )).fetchone()
+    if product:
+        return product
+    raise HTTPException(status_code=404)
