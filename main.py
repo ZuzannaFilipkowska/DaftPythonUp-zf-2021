@@ -50,7 +50,7 @@ async def single_product(id: int):
 @app.get("/employees")
 async def all_employees(limit: int = -1, offset: int = 0, order: str = "EmployeeID"):
     cur = app.db_connection.cursor()
-
+    order = order.strip()
     categories = {'last_name': 'LastName',
                  'first_name': 'FirstName',
                  'city': 'City',
