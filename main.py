@@ -1,7 +1,19 @@
 import sqlite3
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 
 app = FastAPI()
+
+
+class NewCategory(BaseModel):
+    name: str
+
+
+class Category(BaseModel):
+    name: str
+    id: int
+
 
 
 @app.on_event("startup")
@@ -80,7 +92,7 @@ async def get_product_extended():
     return dict(products_extended=product)
 
 
-@app.get("/products/{id}/orders")
+@app.get("/products/{id}/orders", status_code=201)
 async def get_specific_order(id: int):
     cur = app.db_connection.cursor()
     cur.row_factory = sqlite3.Row
@@ -97,3 +109,26 @@ async def get_specific_order(id: int):
         "WHERE p.ProductID = ? ORDER BY o.OrderID", (id,)
     ).fetchall()
     return dict(orders=orders)
+
+
+@app.post("/categories", status_code=201, response_model=Category)
+async def add_caegory(cat: NewCategory):
+    cur = app.db_connection.cursor()
+    cur.execute(
+        "INSERT INTO Categories (CategoryName) VALUES (?);", (cat.name,)
+    )
+    added_cat = Category(name=cat.name, id=cur.lastrowid) # last inserted row id
+    app.db_connection.commit()
+    return added_cat
+
+
+@app.put("/categories/{id}")
+async def modyfy_cat(id: int):
+    cur = app.db_connection.cursor()
+    # TO DO
+
+
+@app.delete("/categories/{id}")
+async def delete_cat(id: int):
+    cur = app.db_connection.cursor()
+    # TO DO
