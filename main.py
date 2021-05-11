@@ -1,127 +1,54 @@
-from fastapi import FastAPI, Response, status, Request, HTTPException
-import random
-import string
-from datetime import datetime
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
-from fastapi_mako import FastAPIMako
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
-from fastapi import Depends, Cookie
+import sqlite3
+from fastapi import FastAPI
 
 app = FastAPI()
-app.__name__ = "templates"
-mako = FastAPIMako(app)
-security = HTTPBasic()
-
-app.s_token = "token_session"
-app.t_token = "token"
-
-# 3.1
 
 
-@app.get("/hello", response_class=HTMLResponse)
-@mako.template("index_mako.html")
-def index_static(request: Request):
-    date = datetime.now().date()
-    setattr(request, "mako", "test")
-    return {"curr_date": date}
+@app.on_event("startup")
+async def startup():
+    app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection.text_factory = lambda b: b.decode(errors="ignore")  # northwind specific
 
 
-# 3.2
-
-@app.post("/login_session", status_code=201)
-def login(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
-    if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
-        raise HTTPException(status_code=401)
-    app.s_token = "token_session"
-    response.set_cookie(key="session_token", value="token_session")
+@app.on_event("shutdown")
+async def shutdown():
+    app.db_connection.close()
 
 
-@app.post("/login_token", status_code=201)
-def get_token(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
-    if credentials.username != "4dm1n" or credentials.password != "NotSoSecurePa$$":
-        raise HTTPException(status_code=401)
-    app.t_value = "token"
-    return {"token": app.t_value}
+@app.get("/categories")
+async def get_cat():
+    cur = app.db_connection.cursor()
+    cat = cur.execute("SELECT CategoryID, CategoryName FROM Categories")
+    return {
+        "categories": [{"id": category[0], "name": category[1]} for category in cat]
+    }
 
 
-# 3.3
-def welcome_response(format):
-    if format == "json":
-        return JSONResponse(content={"message": "Welcome!"})
-    if format == "html":
-        text = """
-    <html>
-        <head>
-            <title>Some HTML in here</title>
-        </head>
-        <body>
-            <h1>Welcome!</h1>
-        </body>
-    </html>
-    """
-        return HTMLResponse(content=text)
-    else:
-        return PlainTextResponse(content='Welcome!')
+@app.get("/customers")
+async def get_customers():
+    cur = app.db_connection.cursor()
+    customers = cur.execute("SELECT CustomerID ,CompanyName, Address, PostalCode, City, Country FROM Customers")
+    return {
+        "customers": [{"id": cust[0], "name": cust[1], "full_address": f'{cust[2]} {cust[3]} {cust[4]} {cust[5]}'} for cust in customers]
+    }
 
 
-@app.get("/welcome_session", status_code=200)
-def welcome(*, response: Response, session_token: str = Cookie(None), format: str = None):
-    if session_token != app.s_token:
-        raise HTTPException(status_code=401)
-    return welcome_response(format)
+'''
+
+@app.get("/products")
+async def products():
+    cursor = app.db_connection.cursor()
+    products = cursor.execute("SELECT ProductName FROM Products").fetchall()
+    return {
+        "products": [product[0] for product in products]
+    }
 
 
-@app.get("/welcome_token", status_code=200)
-def welcome_token(*, response: Response, token: str = Cookie(None), format: str = None):
-    if token != app.t_token:
-        raise HTTPException(status_code=401)
-    return welcome_response(format)
+@app.get("/suppliers/{supplier_id}")
+async def single_supplier(supplier_id: int):
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute(
+        f"SELECT CompanyName, Address FROM Suppliers WHERE SupplierID = {supplier_id}").fetchone()
 
-
-# 3.4
-
-
-def goodbye(format):
-    if format == "json":
-        return JSONResponse(content={"message": "Logged out!"})
-    if format == "html":
-        text = """
-    <html>
-        <head>
-            <title>More HTML</title>
-        </head>
-        <body>
-            <h1>Logged out!</h1>
-        </body>
-    </html>
-    """
-        return HTMLResponse(content=text)
-    else:
-        return PlainTextResponse(content='Logged out!')
-
-
-@app.delete("/logout_session")
-def logout_session(session_token: str = Cookie(None), format: str = None):
-    if session_token != app.s_token:
-        raise HTTPException(status_code=401)
-    if format == 'html':
-        return RedirectResponse(url="/logged_out?format=html", status_code=302)
-    if format == 'json':
-        return RedirectResponse(url="/logged_out?format=json", status_code=302)
-    return RedirectResponse(url="/logged_out", status_code=302)
-
-
-@app.delete("/logout_token")
-def logout(token: str = None, format: str = None):
-    if token != app.t_token:
-        raise HTTPException(status_code=401)
-    if format == 'html':
-        return RedirectResponse(url="/logged_out?format=html", status_code=302)
-    if format == 'json':
-        return RedirectResponse(url="/logged_out?format=json", status_code=302)
-    return RedirectResponse(url="/logged_out", status_code=302)
-
-
-@app.get("/logged_out")
-def logged_out(format: str = None):
-    return goodbye(format)
+    return data
+    '''
