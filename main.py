@@ -25,6 +25,7 @@ async def get_cat():
 @app.get("/customers")
 async def get_customers():
     cur = app.db_connection.cursor()
+    cur.row_factory = sqlite3.Row
     customers = cur.execute(
     "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
     "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
