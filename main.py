@@ -63,4 +63,4 @@ async def all_employees(limit: int = -1, offset: int = 0, order: str = "Employee
         f"SELECT EmployeeID id, LastName last_name, FirstName first_name, City city FROM Employees ORDER BY {categories[order]} LIMIT :lim OFFSET :off"
         , {"lim": limit, "off": offset}
     ).fetchall()
-    return dict(workers=workers)
+    return dict(employees=workers)
