@@ -78,3 +78,22 @@ async def get_product_extended():
         LEFT JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID ORDER BY Products.ProductID
     ''').fetchall()
     return dict(products_extended=product)
+
+
+@app.get("/products/{id}/orders")
+async def get_specific_order(id: int):
+    cur = app.db_connection.cursor()
+    cur.row_factory = sqlite3.Row
+    product = cur.execute(
+        "SELECT p.ProductID FROM Products p where p.ProductID = ?", (id,)
+    ).fetchone()
+    if not product:
+        raise HTTPException(status_code=404)
+    orders = cur.execute(
+        "SELECT o.OrderID id, c.CompanyName customer, od.Quantity quantity, "
+        "ROUND((od.UnitPrice * od.Quantity) - (od.Discount * od.UnitPrice * od.Quantity), 2) total_price "
+        "FROM Orders o INNER JOIN 'Order Details' od on o.OrderID = od.OrderID "
+        "INNER JOIN Products p on od.ProductID = p.ProductID LEFT JOIN Customers c on o.CustomerID = c.CustomerID "
+        "WHERE p.ProductID = ? ORDER BY o.OrderID", (id,)
+    ).fetchall()
+    return dict(orders=orders)
