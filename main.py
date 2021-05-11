@@ -73,7 +73,7 @@ async def get_product_extended():
     cur = app.db_connection.cursor()
     cur.row_factory = sqlite3.Row
     product = cur.execute('''
-        SELECT Products.ProductID, Products.ProductName, Categories.CategoryName, Suppliers.CompanyName
+        SELECT Products.ProductID, id Products.ProductName name, Categories.CategoryName category, Suppliers.CompanyName supplier
         FROM Products LEFT JOIN Categories ON Products.CategoryID = Categories.CategoryID
         LEFT JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID ORDER BY Products.ProductID
     ''').fetchall()
