@@ -25,21 +25,15 @@ async def get_cat():
 @app.get("/customers")
 async def get_customers():
     cur = app.db_connection.cursor()
-    customers = cur.execute("SELECT CustomerID ,CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY CustomerID")
-    return {
-        "customers": [{"id": cust[0], "name": cust[1], "full_address": f'{cust[2]} {cust[3]} {cust[4]} {cust[5]}'} for cust in customers]
-    }
-
+    customers = cur.execute(
+    "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
+    "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
+    "COALESCE(Country, '') full_address "
+    "FROM Customers c ORDER BY UPPER(CustomerID);"
+    ).fetchall()
+    return dict(customers=customers)
 
 '''
-
-@app.get("/products")
-async def products():
-    cursor = app.db_connection.cursor()
-    products = cursor.execute("SELECT ProductName FROM Products").fetchall()
-    return {
-        "products": [product[0] for product in products]
-    }
 
 
 @app.get("/suppliers/{supplier_id}")
