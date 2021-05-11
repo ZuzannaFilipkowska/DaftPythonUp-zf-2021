@@ -25,21 +25,11 @@ async def get_cat():
 @app.get("/customers")
 async def get_customers():
     cur = app.db_connection.cursor()
-    cur.row_factory = sqlite3.Row
-    customers = cur.execute(
-    "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
-    "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
-    "COALESCE(Country, '') full_address "
-    "FROM Customers c ORDER BY UPPER(CustomerID);"
-    ).fetchall()
-    return dict(customers=customers)
-    '''
-    customers = cur.execute(
-        "SELECT CustomerID ,CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY UPPER(CustomerID)")
+    customers = cur.execute("SELECT CustomerID ,CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY CustomerID")
     return {
         "customers": [{"id": cust[0], "name": cust[1], "full_address": f'{cust[2]} {cust[3]} {cust[4]} {cust[5]}'} for cust in customers]
     }
-    '''
+
 
 '''
 
